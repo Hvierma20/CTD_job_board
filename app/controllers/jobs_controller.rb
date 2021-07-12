@@ -1,4 +1,5 @@
 class JobsController < ApplicationController
+    rescue_from ActiveRecord::RecordNotFound, with: :catch_not_found
     before_action :find_job, only: [:show, :edit, :update, :destroy]
     def index
         if params[:category].blank?
@@ -22,7 +23,8 @@ class JobsController < ApplicationController
         if @job.save
             redirect_to @job
         else
-            render "New"
+            flash.notice = "Please enter the complete info"
+            render :new
         end
     end
 
@@ -31,8 +33,10 @@ class JobsController < ApplicationController
 
     def update
         if @job.update(jobs_params)
+            flash.notice = "The job was updated successfully."
             redirect_to @job
         else
+            flash.now.alert = @customer.errors.full_messages.to_sentence
             render "Edit"
         end
     end
